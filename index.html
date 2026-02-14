@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Special Message For You</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Quicksand:wght@300;400;600&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a0011, #2d0a1f, #1a0022);
+            overflow: hidden;
+            font-family: 'Quicksand', sans-serif;
+            cursor: default;
+        }
+
+        /* ── Floating background hearts ── */
+        .bg-heart {
+            position: fixed;
+            color: rgba(255, 100, 150, 0.08);
+            font-size: 30px;
+            animation: floatUp linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes floatUp {
+            0%   { transform: translateY(100vh) rotate(0deg) scale(1); opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(360deg) scale(0.5); opacity: 0; }
+        }
+
+        /* ── Stage container ── */
+        .stage {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .stage.hidden {
+            opacity: 0;
+            transform: scale(0.9);
+            pointer-events: none;
+        }
+
+        /* ══════════════════════════════════
+           STAGE 1 — THE ENVELOPE
+           ══════════════════════════════════ */
+        .envelope-wrapper {
+            perspective: 800px;
+            cursor: pointer;
+        }
+
+        .envelope {
+            width: 280px;
+            height: 180px;
+            background: linear-gradient(145deg, #f7e0e0, #f2c4c4);
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            transition: transform 0.3s ease;
+        }
+
+        .envelope-wrapper:hover .envelope {
+            transform: translateY(-8px);
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 90px;
+            background: linear-gradient(145deg, #e8b4b4, #dba0a0);
+            clip-path: polygon(0 0, 50% 100%, 100% 0);
+            transform-origin: top center;
+            transition: transform 0.6s ease;
+            z-index: 2;
+        }
+
+        .envelope-wrapper:hover .envelope-flap {
+            transform: rotateX(30deg);
+        }
+
+        .envelope-heart {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 40px;
+            animation: heartPulse 1.2s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        @keyframes heartPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.15); }
+        }
+
+        .envelope-text {
+            margin-top: 30px;
+            color: #ff9ec0;
+            font-family: 'Dancing Script', cursive;
+            font-size: 24px;
+            animation: fadeInUp 1s ease 0.5s both;
+        }
+
+        .click-hint {
+            margin-top: 12px;
+            color: rgba(255, 158, 192, 0.5);
+            font-size: 14px;
+            animation: fadeInUp 1s ease 1s both, pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* ══════════════════════════════════
+           STAGE 2 — LOVE LETTER REVEAL
+           ══════════════════════════════════ */
+        .letter-card {
+            background: linear-gradient(145deg, #fff5f5, #ffe8ee);
+            border-radius: 16px;
+            padding: 40px 50px;
+            max-width: 500px;
+            box-shadow: 0 25px 80px rgba(255, 100, 150, 0.2);
+            text-align: center;
+            animation: letterReveal 0.8s ease both;
+        }
+
+        @keyframes letterReveal {
+            from { opacity: 0; transform: translateY(40px) scale(0.8); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .letter-card h2 {
+            font-family: 'Dancing Script', cursive;
+            color: #c44569;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .letter-card p {
+            color: #7a3b5e;
+            line-height: 1.8;
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 40px;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b9d, #c44569);
+            color: white;
+            box-shadow: 0 8px 25px rgba(196, 69, 105, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(196, 69, 105, 0.4);
+        }
+
+        /* ══════════════════════════════════
+           STAGE 3 — HEART CATCH GAME
+           ══════════════════════════════════ */
+        #game-stage {
+            user-select: none;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .game-header h2 {
+            font-family: 'Dancing Script', cursive;
+            color: #ff9ec0;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .game-header p {
+            color: rgba(255, 158, 192, 0.7);
+            font-size: 14px;
+        }
+
+        .score-bar {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin: 15px 0 10px;
+        }
+
+        .score-heart {
+            font-size: 28px;
+            transition: all 0.4s ease;
+            filter: grayscale(1) brightness(0.4);
+        }
+
+        .score-heart.collected {
+            filter: none;
+            animation: collectPop 0.5s ease;
+        }
+
+        @keyframes collectPop {
+            0%   { transform: scale(1); }
+            50%  { transform: scale(1.6); }
+            100% { transform: scale(1); }
+        }
+
+        .game-area {
+            width: 90vw;
+            max-width: 600px;
+            height: 400px;
+            border: 2px solid rgba(255, 100, 150, 0.15);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(5px);
+        }
+
+        .catch-heart {
+            position: absolute;
+            font-size: 36px;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            animation: heartFloat 3s ease-in-out infinite;
+            user-select: none;
+            z-index: 5;
+        }
+
+        .catch-heart:hover {
+            transform: scale(1.3);
+        }
+
+        @keyframes heartFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .catch-message {
+            position: absolute;
+            color: #ffb8d0;
+            font-family: 'Dancing Script', cursive;
+            font-size: 18px;
+            pointer-events: none;
+            animation: messagePop 1.5s ease forwards;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        @keyframes messagePop {
+            0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+            20%  { opacity: 1; transform: translateY(-20px) scale(1); }
+            80%  { opacity: 1; transform: translateY(-60px) scale(1); }
+            100% { opacity: 0; transform: translateY(-80px) scale(0.8); }
+        }
+
+        /* ══════════════════════════════════
+           STAGE 4 — THE BIG ASK
+           ══════════════════════════════════ */
+        .ask-stage {
+            text-align: center;
+        }
+
+        .ask-stage h1 {
+            font-family: 'Dancing Script', cursive;
+            color: #ff6b9d;
+            font-size: 48px;
+            margin-bottom: 15px;
+            animation: fadeInUp 0.8s ease both;
+            text-shadow: 0 0 40px rgba(255, 107, 157, 0.3);
+        }
+
+        .ask-stage .sub-text {
+            color: #ffb8d0;
+            font-size: 18px;
+            margin-bottom: 50px;
+            animation: fadeInUp 0.8s ease 0.3s both;
+        }
+
+        .ask-buttons {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            align-items: center;
+            animation: fadeInUp 0.8s ease 0.6s both;
+            position: relative;
+            min-height: 80px;
+        }
+
+        .btn-yes {
+            background: linear-gradient(135deg, #ff6b9d, #ff3d7f);
+            color: white;
+            padding: 18px 55px;
+            font-size: 22px;
+            box-shadow: 0 10px 30px rgba(255, 61, 127, 0.3);
+            z-index: 5;
+        }
+
+        .btn-yes:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 61, 127, 0.5);
+        }
+
+        .btn-no {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 200, 220, 0.7);
+            padding: 14px 35px;
+            font-size: 16px;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 4;
+        }
+
+        .no-message {
+            color: #ff9ec0;
+            font-family: 'Dancing Script', cursive;
+            font-size: 20px;
+            margin-top: 20px;
+            min-height: 30px;
+            animation: fadeInUp 0.3s ease both;
+        }
+
+        /* ══════════════════════════════════
+           STAGE 5 — CELEBRATION
+           ══════════════════════════════════ */
+        .celebration {
+            text-align: center;
+        }
+
+        .celebration h1 {
+            font-family: 'Dancing Script', cursive;
+            color: #ff6b9d;
+            font-size: 56px;
+            margin-bottom: 20px;
+            animation: celebrateText 1s ease both;
+            text-shadow: 0 0 60px rgba(255, 107, 157, 0.4);
+        }
+
+        @keyframes celebrateText {
+            0%   { opacity: 0; transform: scale(0.3) rotate(-10deg); }
+            60%  { transform: scale(1.1) rotate(3deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+
+        .celebration p {
+            color: #ffb8d0;
+            font-size: 22px;
+            animation: fadeInUp 1s ease 0.5s both;
+            font-family: 'Dancing Script', cursive;
+        }
+
+        .big-heart {
+            font-size: 100px;
+            display: inline-block;
+            animation: bigHeartBeat 1s ease-in-out infinite;
+            margin: 20px 0;
+        }
+
+        @keyframes bigHeartBeat {
+            0%, 100% { transform: scale(1); }
+            15% { transform: scale(1.15); }
+            30% { transform: scale(1); }
+            45% { transform: scale(1.1); }
+        }
+
+        /* ── Confetti ── */
+        .confetti-piece {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            z-index: 100;
+            animation: confettiFall linear forwards;
+        }
+
+        @keyframes confettiFall {
+            0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* ── Sparkle burst ── */
+        .sparkle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 100;
+            font-size: 20px;
+            animation: sparklePop 1s ease forwards;
+        }
+
+        @keyframes sparklePop {
+            0%   { opacity: 1; transform: scale(0) translate(0, 0); }
+            50%  { opacity: 1; transform: scale(1.2) translate(var(--tx), var(--ty)); }
+            100% { opacity: 0; transform: scale(0.5) translate(calc(var(--tx) * 1.5), calc(var(--ty) * 1.5 + 40px)); }
+        }
+
+        /* ── Music toggle ── */
+        .music-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,100,150,0.3);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 200;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            color: #ff9ec0;
+        }
+
+        .music-toggle:hover {
+            background: rgba(255,100,150,0.2);
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ▸ STAGE 1 — Envelope -->
+    <div class="stage" id="stage-envelope">
+        <div class="envelope-wrapper" onclick="openEnvelope()">
+            <div class="envelope">
+                <div class="envelope-flap"></div>
+                <div class="envelope-heart">💌</div>
+            </div>
+        </div>
+        <div class="envelope-text">You've got a special message...</div>
+        <div class="click-hint">click to open</div>
+    </div>
+
+    <!-- ▸ STAGE 2 — Letter -->
+    <div class="stage hidden" id="stage-letter">
+        <div class="letter-card">
+            <h2>Hey Beautiful 💕</h2>
+            <p>
+                I have a little surprise for you...<br>
+                BUT FIRST YOU HAVE TO PLAY MY GAME!!!<br><br>
+                Can you win or will it remian a mystery....<br>
+                We'll have to see heheheheehehe
+            </p>
+            <button class="btn btn-primary" onclick="startGame()">PLAYYYY 💗</button>
+        </div>
+    </div>
+
+    <!-- ▸ STAGE 3 — Heart Catch Game -->
+    <div class="stage hidden" id="game-stage">
+        <div class="game-header">
+            <h2>CATCH ALL THE HEARTS JANU</h2>
+            <p>CAN YOU CATCH ALL THE HEARTS BEFORE THEY VANISH FOREVER??</p>
+            <div class="score-bar" id="score-bar"></div>
+        </div>
+        <div class="game-area" id="game-area"></div>
+    </div>
+
+    <!-- ▸ STAGE 4 — The Big Ask -->
+    <div class="stage hidden" id="stage-ask">
+        <div class="ask-stage">
+            <h1>Will You Be My Valentine?</h1>
+            <p class="sub-text">You caught all the hearts, and you caught mine too 😏😏😏. But here's the real quesiton....</p>
+            <div class="ask-buttons" id="ask-buttons">
+                <button class="btn btn-yes" onclick="sayYes()">Yes!! 💖</button>
+                <button class="btn btn-no" id="btn-no" onclick="dodgeNo()">No</button>
+            </div>
+            <div class="no-message" id="no-message"></div>
+        </div>
+    </div>
+
+    <!-- ▸ STAGE 5 — Celebration -->
+    <div class="stage hidden" id="stage-celebrate">
+        <div class="celebration">
+            <div class="big-heart">💖</div>
+            <h1>YAYAYAYAYAYAYY!! 🎉</h1>
+            <p>You just made me the happiest person in the world!</p>
+            <p style="margin-top: 15px; font-size: 26px;">Happy Valentine's Day, my love 🌹</p>
+        </div>
+    </div>
+
+    <script>
+        // ── Background floating hearts ──
+        function createBgHearts() {
+            const hearts = ['💕', '💗', '💓', '💖', '🩵', '❤️', '💘', '✨'];
+            for (let i = 0; i < 25; i++) {
+                const el = document.createElement('div');
+                el.className = 'bg-heart';
+                el.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.fontSize = (15 + Math.random() * 25) + 'px';
+                el.style.animationDuration = (6 + Math.random() * 10) + 's';
+                el.style.animationDelay = (Math.random() * 8) + 's';
+                document.body.appendChild(el);
+            }
+        }
+        createBgHearts();
+
+        // ── Stage transitions ──
+        function showStage(id) {
+            document.querySelectorAll('.stage').forEach(s => s.classList.add('hidden'));
+            setTimeout(() => {
+                document.getElementById(id).classList.remove('hidden');
+            }, 400);
+        }
+
+        // ── STAGE 1 → 2 ──
+        function openEnvelope() {
+            const flap = document.querySelector('.envelope-flap');
+            flap.style.transform = 'rotateX(180deg)';
+            setTimeout(() => showStage('stage-letter'), 800);
+        }
+
+        // ── STAGE 2 → 3: Game ──
+        const TOTAL_HEARTS = 8;
+        let caughtCount = 0;
+        const loveMessages = [
+            "You're so beautiful princess :)",
+            "I LOVE YOU SO MUCH 💕",
+            "You're my favorite person ever janu :)",
+            "MISSUUUU",
+            "You're so gorgeousssss",
+            "MWAHHHH",
+            "❤️❤️❤️❤️❤️",
+            "Thank you for being my best friend :))"
+        ];
+
+        function startGame() {
+            caughtCount = 0;
+            showStage('game-stage');
+
+            // Build score bar
+            const bar = document.getElementById('score-bar');
+            bar.innerHTML = '';
+            for (let i = 0; i < TOTAL_HEARTS; i++) {
+                const h = document.createElement('span');
+                h.className = 'score-heart';
+                h.textContent = '💖';
+                h.id = 'sh-' + i;
+                bar.appendChild(h);
+            }
+
+            setTimeout(spawnHeart, 800);
+        }
+
+        function spawnHeart() {
+            if (caughtCount >= TOTAL_HEARTS) return;
+
+            const area = document.getElementById('game-area');
+            const heart = document.createElement('div');
+            heart.className = 'catch-heart';
+
+            const emojis = ['💖', '💗', '💓', '💕', '💘', '❤️', '🩷', '🩵'];
+            heart.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+
+            const maxX = area.clientWidth - 50;
+            const maxY = area.clientHeight - 50;
+            heart.style.left = (20 + Math.random() * (maxX - 20)) + 'px';
+            heart.style.top = (20 + Math.random() * (maxY - 20)) + 'px';
+            heart.style.animationDelay = Math.random() * 0.5 + 's';
+
+            heart.addEventListener('click', () => catchHeart(heart));
+            area.appendChild(heart);
+
+            // Move heart every 1.5s
+            const moveInterval = setInterval(() => {
+                if (!heart.parentNode) { clearInterval(moveInterval); return; }
+                heart.style.left = (20 + Math.random() * (maxX - 20)) + 'px';
+                heart.style.top = (20 + Math.random() * (maxY - 20)) + 'px';
+            }, 1800);
+
+            heart._moveInterval = moveInterval;
+
+            // Spawn next heart with delay
+            if (caughtCount < TOTAL_HEARTS) {
+                setTimeout(spawnHeart, 1200);
+            }
+        }
+
+        function catchHeart(heartEl) {
+            if (caughtCount >= TOTAL_HEARTS) return;
+            const area = document.getElementById('game-area');
+
+            // Show message
+            const msg = document.createElement('div');
+            msg.className = 'catch-message';
+            msg.textContent = loveMessages[caughtCount];
+            msg.style.left = heartEl.style.left;
+            msg.style.top = heartEl.style.top;
+            area.appendChild(msg);
+            setTimeout(() => msg.remove(), 1500);
+
+            // Grab position BEFORE removing
+            const rect = heartEl.getBoundingClientRect();
+
+            // Remove heart
+            clearInterval(heartEl._moveInterval);
+            heartEl.remove();
+
+            // Update score
+            const sh = document.getElementById('sh-' + caughtCount);
+            sh.classList.add('collected');
+
+            caughtCount++;
+
+            // Burst sparkles at click
+            burstSparkles(rect);
+
+            if (caughtCount >= TOTAL_HEARTS) {
+                // Clear remaining hearts
+                document.querySelectorAll('.catch-heart').forEach(h => {
+                    clearInterval(h._moveInterval);
+                    h.remove();
+                });
+                setTimeout(() => showStage('stage-ask'), 1200);
+            }
+        }
+
+        function burstSparkles(rect) {
+            const sparkles = ['✨', '💫', '⭐', '🌟', '💖'];
+            for (let i = 0; i < 6; i++) {
+                const s = document.createElement('div');
+                s.className = 'sparkle';
+                s.textContent = sparkles[Math.floor(Math.random() * sparkles.length)];
+                const angle = (Math.PI * 2 / 6) * i;
+                const dist = 40 + Math.random() * 30;
+                s.style.left = rect.left + rect.width/2 + 'px';
+                s.style.top = rect.top + rect.height/2 + 'px';
+                s.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+                s.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+                document.body.appendChild(s);
+                setTimeout(() => s.remove(), 1000);
+            }
+        }
+
+        // ── STAGE 4 — Dodging "No" button ──
+        let dodgeCount = 0;
+        let lastDodgeTime = 0;
+        const dodgeMessages = [
+            "Bruh",
+            "Wrong answer.",
+            "STOPP",
+            "Are you sure????",
+            "YES OR YES",
+            ":((",
+            "6 7",
+            "I'll buy u cookies if u click yes"
+        ];
+
+        function dodgeNo() {
+            const btn = document.getElementById('btn-no');
+
+            // Move to body on first click so position:fixed works
+            if (dodgeCount === 0) {
+                document.body.appendChild(btn);
+            }
+
+            // Random position within viewport (with safe padding)
+            const pad = 80;
+            const newX = pad + Math.random() * (window.innerWidth - pad * 2);
+            const newY = pad + Math.random() * (window.innerHeight - pad * 2);
+
+            btn.style.position = 'fixed';
+            btn.style.left = newX + 'px';
+            btn.style.top = newY + 'px';
+
+            // Shrink the no button a bit each time
+            const scale = Math.max(0.5, 1 - dodgeCount * 0.06);
+            btn.style.transform = `scale(${scale})`;
+
+            // Show funny message
+            const msgEl = document.getElementById('no-message');
+            msgEl.textContent = dodgeMessages[dodgeCount % dodgeMessages.length];
+
+            dodgeCount++;
+
+            // Make Yes button grow
+            const yesBtn = document.querySelector('.btn-yes');
+            const yesScale = 1 + dodgeCount * 0.04;
+            yesBtn.style.transform = `scale(${yesScale})`;
+        }
+
+        // ── STAGE 5 — Celebration ──
+        function sayYes() {
+            showStage('stage-celebrate');
+            launchConfetti();
+            launchHeartBurst();
+        }
+
+        function launchConfetti() {
+            const colors = ['#ff6b9d', '#ff3d7f', '#ffb8d0', '#ff9ec0', '#c44569',
+                            '#ffd700', '#ff69b4', '#ff1493', '#ff6eb4', '#fff'];
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    const piece = document.createElement('div');
+                    piece.className = 'confetti-piece';
+                    piece.style.left = Math.random() * 100 + 'vw';
+                    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    piece.style.width = (6 + Math.random() * 8) + 'px';
+                    piece.style.height = (6 + Math.random() * 8) + 'px';
+                    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                    piece.style.animationDuration = (2 + Math.random() * 3) + 's';
+                    piece.style.animationDelay = '0s';
+                    document.body.appendChild(piece);
+                    setTimeout(() => piece.remove(), 5000);
+                }, i * 30);
+            }
+        }
+
+        function launchHeartBurst() {
+            const hearts = ['💖', '💗', '💕', '💓', '❤️', '💘', '🩷', '💝', '🌹', '✨'];
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const h = document.createElement('div');
+                    h.className = 'sparkle';
+                    h.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+                    h.style.fontSize = (20 + Math.random() * 30) + 'px';
+                    h.style.left = window.innerWidth / 2 + 'px';
+                    h.style.top = window.innerHeight / 2 + 'px';
+                    const angle = (Math.PI * 2 / 30) * i;
+                    const dist = 100 + Math.random() * 200;
+                    h.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+                    h.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+                    document.body.appendChild(h);
+                    setTimeout(() => h.remove(), 1500);
+                }, i * 50);
+            }
+
+            // Second wave
+            setTimeout(() => {
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        const h = document.createElement('div');
+                        h.className = 'sparkle';
+                        h.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+                        h.style.fontSize = (15 + Math.random() * 25) + 'px';
+                        h.style.left = (Math.random() * window.innerWidth) + 'px';
+                        h.style.top = (Math.random() * window.innerHeight) + 'px';
+                        const angle = Math.random() * Math.PI * 2;
+                        const dist = 50 + Math.random() * 100;
+                        h.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+                        h.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+                        document.body.appendChild(h);
+                        setTimeout(() => h.remove(), 1500);
+                    }, i * 80);
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
